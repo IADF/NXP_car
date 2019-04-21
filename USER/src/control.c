@@ -1,6 +1,10 @@
 #include "control.h"
 
-#define parameter_mode 4 //0为测试1为参数//参数3开始为控制周期6ms的
+#define parameter_mode 3 //0为测试1为参数//参数3开始为控制周期6ms的
+
+//中线程序相关变量
+extern uint8 L_curve_flag;//右弯标志位
+extern uint8 R_curve_flag;//左弯标志位
 
 //mpu6050相关变量
 uint8 PIT_flag;
@@ -74,109 +78,151 @@ int direction_PWM_limit;
 
 #endif
 
-//参数1
-#if  parameter_mode==1
-//直立PID参数
-//角度环通过PD参数整定
-#define static_angle_D  -18.4//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
-#define left_deal_val   0  
-#define right_deal_val  0
-//#define static_down_angle_P  42
-#define static_angle_P  42//42//78//88//108//112//122//142
-float balance_angle=-31.8;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4
+//直立环的控制周期为2ms的参数
+////参数1
+//#if  parameter_mode==1
+////直立PID参数
+////角度环通过PD参数整定
+//#define static_angle_D  -18.4//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
+//#define left_deal_val   0  
+//#define right_deal_val  0
+////#define static_down_angle_P  42
+//#define static_angle_P  42//42//78//88//108//112//122//142
+//float balance_angle=-31.8;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4
+//
+////速度环通过PI控制
+//#define speed_P  0.4
+//#define speed_I  0.002
+//#define speed_D  0
+//#define speed_destination 80//车模期望速度 
+//#define speed_output_limit 30
+//#define speed_up_limit 5
+//#define speed_integral_limit 400//积分上限
+//
+//float direction_P=20.0;//方向环P参数
+//float direction_D=0;//方向环D参数 
+//
+//int direction_PWM_limit;
+//#endif
+//
+////参数2
+//#if parameter_mode==2
+////直立PID参数
+////角度环通过PD参数整定
+//#define static_angle_D  -17.4//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
+//#define left_deal_val   0  
+//#define right_deal_val  0
+////#define static_down_angle_P  42
+//#define static_angle_P  42//42//78//88//108//112//122//142
+//float balance_angle=-31.8;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4
+//
+////速度环通过PI控制
+//#define speed_P  0.4
+//#define speed_I  0
+//#define speed_D  0
+//#define speed_destination 100//车模期望速度 
+//#define speed_output_limit 100
+//#define speed_up_limit 5
+//#define speed_integral_limit 50//积分上限
+//
+//float direction_P=20.0;//方向环P参数
+//float direction_D=0;//方向环D参数 
+//
+//int direction_PWM_limit;
+//#endif
 
-//速度环通过PI控制
-#define speed_P  0.4
-#define speed_I  0.002
-#define speed_D  0
-#define speed_destination 80//车模期望速度 
-#define speed_output_limit 30
-#define speed_up_limit 5
-#define speed_integral_limit 400//积分上限
-
-float direction_P=20.0;//方向环P参数
-float direction_D=0;//方向环D参数 
-
-int direction_PWM_limit;
-#endif
-
-//参数2
-#if parameter_mode==2
-//直立PID参数
-//角度环通过PD参数整定
-#define static_angle_D  -17.4//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
-#define left_deal_val   0  
-#define right_deal_val  0
-//#define static_down_angle_P  42
-#define static_angle_P  42//42//78//88//108//112//122//142
-float balance_angle=-31.8;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4
-
-//速度环通过PI控制
-#define speed_P  0.4
-#define speed_I  0
-#define speed_D  0
-#define speed_destination 100//车模期望速度 
-#define speed_output_limit 100
-#define speed_up_limit 5
-#define speed_integral_limit 50//积分上限
-
-float direction_P=20.0;//方向环P参数
-float direction_D=0;//方向环D参数 
-
-int direction_PWM_limit;
-#endif
-
+//比较稳但是速度很慢，
 #if parameter_mode==3
 //直立PID参数
 //角度环通过PD参数整定
-#define static_angle_D  -48//-68.0//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
+#define static_angle_D  -34//-38//-64//48//-68.0//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
 #define left_deal_val   0  
 #define right_deal_val  0
 //#define static_down_angle_P  42
-#define static_angle_P  56//52
+#define static_angle_P  52//52
 //42//78//88//108//112//122//142
-float balance_angle=-29.2;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4//26.2~26.7
+float balance_angle=-29.8;//29.2//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4//26.2~26.7
 
 //速度环通过PI控制
-#define speed_P  1.4
+#define speed_P  3.2
 #define speed_I  0.004
 #define speed_D  0
-#define speed_destination 80//车模期望速度 
+#define speed_destination 120//80//车模期望速度 
+#define speed_curve_destination 60//转向时车模的期望速度
 #define speed_output_limit 200
 #define speed_up_limit 10
 #define speed_integral_limit 500//积分上限
 
-float direction_P=20;//方向环P参数
-float direction_D=0;//方向环D参数 
+float direction_P=16;//方向环P参数
+float direction_I=0;
+float direction_D=-1.2;//方向环D参数 
 
-int direction_PWM_limit=40;
+int direction_PWM_limit=60;
 #endif
 
 //参数4
 #if parameter_mode==4
 //直立PID参数
 //角度环通过PD参数整定
-#define static_angle_D  -0.0//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
+#define static_angle_D  -34//-38//-64//48//-68.0//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
 #define left_deal_val   0  
 #define right_deal_val  0
 //#define static_down_angle_P  42
-#define static_angle_P  0//52
+#define static_angle_P  52//52
 //42//78//88//108//112//122//142
-float balance_angle=-28.4;//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4//26.2~26.7
+float balance_angle=-29.8;//29.2//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4//26.2~26.7
 
 //速度环通过PI控制
-#define speed_P  0
-#define speed_I  0
+#define speed_P  2.8
+#define speed_I  0.004
 #define speed_D  0
-#define speed_destination 0//车模期望速度 
-#define speed_output_limit 0
-#define speed_up_limit 0
-#define speed_integral_limit 0//积分上限
+#define speed_destination 60//80//车模期望速度 
+#define speed_curve_destination 60//车模转弯的期望速度
+#define speed_output_limit 200
+#define speed_up_limit 10
+#define speed_integral_limit 500//积分上限
 
-float direction_P=0;//方向环P参数
-float direction_D=10;//方向环D参数 
 
-int direction_PWM_limit=1000;
+//方向环
+float direction_P=20;//方向环P参数
+float direction_I=0;
+float direction_D=-1.8;//方向环D参数 
+
+#define direction_up_limit 10
+
+int direction_PWM_limit=60;
+#endif
+
+//参数5
+#if parameter_mode==5
+//直立PID参数
+//角度环通过PD参数整定
+#define static_angle_D  -31//-38//-64//48//-68.0//-12.0//-1.0//-0.5//-32.0//-1.0//14.2//14.2//11.2//19.2//9.1//18.4//31.6//-12.0
+#define left_deal_val   0  
+#define right_deal_val  0
+//#define static_down_angle_P  42
+#define static_angle_P  68//52
+//42//78//88//108//112//122//142
+float balance_angle=-29.8;//29.2//-20.7;//-37.4;//机械零点角度 44.8~47//39//35-38大约36//35.4//26.2~26.7
+
+//速度环通过PI控制
+#define speed_P  4.2
+#define speed_I  0.04
+#define speed_D  0
+#define speed_destination 160//80//车模期望速度 
+#define speed_output_limit 300
+#define speed_up_limit 10
+#define speed_integral_limit 500//积分上限
+
+
+//方向环
+float direction_P=14;//方向环P参数
+float direction_I=0;
+float direction_D=-1.8;//方向环D参数 
+
+#define direction_up_limit 0
+
+int direction_PWM_limit=80;
 #endif
 
 //float var[4];
@@ -196,8 +242,7 @@ void PIT0_IRQHandler(void)//每间隔2ms进入一次定时器中断函数
   float var[6];
   
   ms_task_flag++;
-  
-  
+   
   if((ms_task_flag%2)==0)//4ms_task速度环
   {     
       //正交解码程序
@@ -249,6 +294,7 @@ void PIT0_IRQHandler(void)//每间隔2ms进入一次定时器中断函数
       
       speed_output_val=(int)(speed_P*(middle_encoder_old_val-speed_destination)+speed_I*speed_integral_val);
    }
+
     
    if((ms_task_flag%4)==0)//8ms_task方向环
    {
@@ -400,6 +446,25 @@ void PIT0_IRQHandler(void)
       LED_Ctrl(LEDALL,OFF);
       LED_Ctrl(LED1,ON);
     }
+    
+         //速度环
+#if 0 
+      middle_encoder_val=(right_encoder_val+left_encoder_val)/2;
+      
+      if(middle_encoder_val-middle_encoder_old_val>speed_output_limit) middle_encoder_old_val+=speed_output_limit;
+      else if(middle_encoder_val-middle_encoder_old_val<-speed_output_limit) middle_encoder_old_val-=speed_output_limit;
+      else middle_encoder_old_val=middle_encoder_val;
+      
+      speed_integral_val+=middle_encoder_old_val;
+      
+      //积分限幅
+      if(speed_integral_val>speed_integral_limit) speed_integral_val=speed_integral_limit;
+      else if(speed_integral_val<-speed_integral_limit) speed_integral_val=-speed_integral_limit;
+      
+      speed_output_val=(int)(speed_P*(middle_encoder_old_val-speed_destination)+speed_I*speed_integral_val);
+      
+#endif
+
 //    //上位机看陀螺仪波形程序    
 //    var[0]=mpu_gyro_float_y;
 //    var[1]=angle;
@@ -418,8 +483,21 @@ void PIT0_IRQHandler(void)
      dis_bmp(OV7725_H,OV7725_W,image_dec[0],123);
      mpu_gyro_z_add/=(float)4;
      
-     direction_output_val=(int)(((float)middle_Line-theory_middle_line)*(float)direction_P+(float)direction_D*(float)mpu_gyro_z_add);
+     direction_output_val=(int)(((float)middle_Line-theory_middle_line)*(float)direction_P+(float)direction_D*(float)mpu_gyro_z_add+direction_I);
+   
+//固定值限制方向环PWM增长
+#if 0
+     if((direction_output_val-direction_output_old_val)>direction_up_limit) direction_output_old_val+=direction_up_limit;
+     if((direction_output_val-direction_output_old_val)>direction_up_limit) 
      
+#endif 
+     
+//比例限制方向PWM增长 (使转向圆滑)    
+#if 1     
+    direction_output_old_val=(int)((float)direction_output_old_val*0.6+(float)direction_output_val*0.4);
+#endif 
+    
+    
      //方向环限幅
      if(direction_output_val>direction_PWM_limit)
        direction_output_val=direction_PWM_limit;
@@ -428,10 +506,9 @@ void PIT0_IRQHandler(void)
      
      mpu_gyro_z_add=0;
   }
-
-  if(ms_task>=12)
+  if((ms_task%6)==0)
   {
-     //速度环
+       //速度环
 #if 1 
       middle_encoder_val=(right_encoder_val+left_encoder_val)/2;
       
@@ -441,15 +518,17 @@ void PIT0_IRQHandler(void)
       
       speed_integral_val+=middle_encoder_old_val;
       
-#endif
       
       //积分限幅
       if(speed_integral_val>speed_integral_limit) speed_integral_val=speed_integral_limit;
       else if(speed_integral_val<-speed_integral_limit) speed_integral_val=-speed_integral_limit;
       
-      speed_output_val=(int)(speed_P*(middle_encoder_old_val-speed_destination)+speed_I*speed_integral_val);
-    
-        
+      if(L_curve_flag||R_curve_flag) speed_output_val=(int)(speed_P*(middle_encoder_old_val-speed_curve_destination)+speed_I*speed_integral_val);
+      else speed_output_val=(int)(speed_P*(middle_encoder_old_val-speed_destination)+speed_I*speed_integral_val);
+#endif  
+  }
+  if(ms_task>=12)
+  {
       ms_task=0;
   }
 }
@@ -461,13 +540,13 @@ void PIT0_IRQHandler(void)
 //速度环平滑输出程序
 int speed_smoothness_output()
 {
-  if(speed_count>=12)
+  if(speed_count>=3)
     speed_count=0;
   speed_count++;
   
   speed_smoothness_output_old_val=speed_smoothness_output_val;
   
-  speed_smoothness_output_val=speed_smoothness_output_old_val+(int)((float)(speed_output_val-speed_smoothness_output_old_val)*(float)speed_count/12.0);//速度环周期为4ms//每2毫秒进行一次电机控制
+  speed_smoothness_output_val=speed_smoothness_output_old_val+(int)((float)(speed_output_val-speed_smoothness_output_old_val)*(float)speed_count/3.0);//速度环周期为4ms//每2毫秒进行一次电机控制
   
   return speed_smoothness_output_val;
 }
@@ -619,4 +698,83 @@ void motor_control(int motor_right_val,int motor_left_val)
 ////      
 ////      vcan_sendware((void*)var,sizeof(var)); 
       
-
+//参考的PID程序
+// 位置式动态PID控制
+//int32 PlacePID_Control(PID *sprt, float *PID, float NowPiont, float SetPoint)
+//{
+//	//定义为寄存器变量，只能用于整型和字符型变量，提高运算速度
+//	float iError;	//当前误差
+//	int  Actual;	//最后得出的实际输出值
+//	float Kp;		//动态P
+//	
+//	iError = SetPoint - NowPiont;	//计算当前误差
+//	sprt->SumError += iError*0.01;
+//	if (sprt->SumError >= PID[KT])
+//	{
+//		sprt->SumError = PID[KT];
+//	}
+//	else if (sprt->SumError <= PID[KT])
+//	{
+//		sprt->SumError = -PID[KT];
+//	}
+//	//二次函数是为了达到 误差越大  反应越快 回复力越大 其中 KI值是误差为0时的P 也就是直道上的P值
+//	Kp = 1.0 * (iError*iError) / PID[KP] + PID[KI];	//P值与差值成二次函数关系，此处P和I不是PID参数，而是动态PID参数，要注意！！！
+//	
+//	Actual = Kp * iError
+//		   + PID[KD] * ((0.8*iError + 0.2*sprt->LastError) - sprt->LastError);//不完全微分  
+//	sprt->LastError = iError;		//更新上次误差
+//
+//	Actual = range_protect(Actual, -260, 260);
+//
+//	return Actual;
+//}
+//
+//// 位置式PID控制
+//int32 PID_Realize(PID *sptr, float *PID, int32 NowData, int32 Point)
+//{
+//	//当前误差，定义为寄存器变量，只能用于整型和字符型变量，提高运算速度
+//	int32 Realize;	// 最后得出的实际增量
+//
+//	sptr->Dis_Err = Point - NowData;	// 计算当前误差
+//	sptr->SumError += PID[KI] * sptr->Dis_Err;	// 误差积分
+//	
+//	if (sptr->SumError >= PID[KT])
+//	{
+//		sptr->SumError = PID[KT];
+//	}
+//	else if (sptr->SumError <= -PID[KT])
+//	{
+//		sptr->SumError = -PID[KT];
+//	}
+//	
+//	Realize = PID[KP] * sptr->Dis_Err
+//			+ sptr->SumError
+//			+ PID[KD] *(sptr->Dis_Err  - sptr->LastError);
+////			+ PID[KB] * ( NowData- sptr->LastData); //微分先行
+//	
+//	sptr->PrevError = sptr->LastError;	// 更新前次误差
+//	sptr->LastError = sptr->Dis_Err;		  	// 更新上次误差
+//	sptr->LastData  = NowData;			// 更新上次数据
+//
+//	return Realize;	// 返回实际值
+//}
+//
+//// 增量式PID电机控制
+//int32 PID_Increase(PID *sptr, float *PID, int32 NowData, int32 Point)
+//{
+//	//当前误差，定义为寄存器变量，只能用于整型和字符型变量，提高运算速度
+//	int32 iError,	//当前误差
+//		Increase;	//最后得出的实际增量
+//
+//	iError = Point - NowData;	// 计算当前误差
+//
+//	Increase =  PID[KP] * (iError - sptr->LastError)
+//			  + PID[KI] * iError
+//			  + PID[KD] * (iError - 2 * sptr->LastError + sptr->PrevError);
+//	
+//	sptr->PrevError = sptr->LastError;	// 更新前次误差
+//	sptr->LastError = iError;		  	// 更新上次误差
+//	sptr->LastData  = NowData;			// 更新上次数据
+//	
+//	return Increase;	// 返回增量
+//}

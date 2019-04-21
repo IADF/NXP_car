@@ -27,7 +27,7 @@ uint8  farthest_scan_X_max_L;
 
 uint8 starting_line;
 
-int8 prospect=29;//29;//前瞻
+int8 prospect=33;//29;//前瞻//为隔行扫描所以前瞻取值应为奇数
 
 uint8 stop_line_check=0;                   //起跑线检测标志，0为关闭起跑线检测 1为开始起跑线检测
 
@@ -35,6 +35,8 @@ uint8 slow_down=0;                    //减速标记
 
 uint8  curve_flag=0;                              //出环标记
 
+uint8  R_curve_flag=0;                               //右弯标志位         
+uint8  L_curve_flag=0;                               //左弯标志位
 
 int L,R;
 
@@ -64,8 +66,8 @@ void find_middle_line()
     
     uint8  lose_line_flag=0;                               //全丢线标志位
     
-    uint8  R_curve_flag=0;                               //右弯标志位         
-    uint8  L_curve_flag=0;                               //左弯标志位
+    R_curve_flag=0;                               //右弯标志位         
+    L_curve_flag=0;                               //左弯标志位
     
     //uint8  R_slow_downe=0;
    // uint8  L_slow_downe=0;
@@ -108,12 +110,12 @@ void find_middle_line()
     farthest_scan_Y_max_L=59;
        if(
           ring_flag==1
-         &&R_mutation_shrink_flag<30)
+         &&R_mutation_shrink_flag<30)//&&R_mutation_shrink_flag<30
               {
                 aa=R_shrink_flag[R_mutation_shrink_flag]+2;
               }
      else if(ring_flag==2
-              &&L_mutation_shrink_flag<30)
+             &&L_mutation_shrink_flag<30 )//&&L_mutation_shrink_flag<30
               {
                 aa=L_shrink_flag[L_mutation_shrink_flag]-2;
               }
@@ -121,11 +123,11 @@ void find_middle_line()
           {
             aa=39;
          }
-
+    
     //纵向扫描
     for(j=5;j<75;j++)
     {
-        for(i=59;i>0;i--)
+        for(i=59;i>0;i--)//基准点寻找从跳变点开始寻找
         {
             if((imgbuff[i*10+j/8]&(1<<(7-j%8)))!=0)
             { 
@@ -133,7 +135,7 @@ void find_middle_line()
                   {
                      if(farthest_scan_Y_max_R>=i)
                     {
-                        farthest_scan_Y_max_R=i;
+                        farthest_scan_Y_max_R=i+2;
                         farthest_scan_X_max_R=j;
                     } 
                   }
@@ -141,7 +143,7 @@ void find_middle_line()
                 {
                     if(farthest_scan_Y_max_L>i)
                     {
-                        farthest_scan_Y_max_L=i;
+                        farthest_scan_Y_max_L=i+2;
                         farthest_scan_X_max_L=j;
                     }
                 }
@@ -526,12 +528,12 @@ void find_middle_line()
             lose_line_flag=2;
         }
 
-        if(Img_R[i]>Img_R[i+2]&&Img_R[i+2]>Img_R[i+4]&&R_curve_flag==0&&i>25)
+        if(Img_R[i]>Img_R[i+2]&&Img_R[i+2]>Img_R[i+4]&&R_curve_flag==0&&i>25)//i>25
         {
           R_curve_flag=1;
        //    printf("右弯");
         }
-        if(Img_L[i]<Img_L[i+2]&&Img_L[i+2]<Img_L[i+4]&&L_curve_flag==0&&i>25)
+        if(Img_L[i]<Img_L[i+2]&&Img_L[i+2]<Img_L[i+4]&&L_curve_flag==0&&i>25)//i>25
         {
           L_curve_flag=1;
         //   printf("左弯");

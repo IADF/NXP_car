@@ -22,7 +22,7 @@ Designed by Fly Sir
 *********************************************/  
 #include "headfile.h"
 
-#define debug_mode 0//0正常程序，1mpu6050调试程序，2摄像头调试程序
+#define debug_mode 0//0正常程序，1mpu6050调试程序，2摄像头调试程序，3四元数解算调试
 
 uint8 img[OV7725_W * OV7725_H];
 //KALMAN_STRUCT atti_x,atti_y;//卡尔曼滤波相关参数结构体初始化函数
@@ -100,7 +100,8 @@ int main(void)
     
     Get_AccData();
     Get_Gyro();
-    //    将陀螺仪的速度换算
+    
+//    将陀螺仪的速度换算
 //    mpu_gyro_float_x=(float)mpu_gyro_x*0.0610361;
     mpu_gyro_float_y=(float)mpu_gyro_y*0.0610361;
 //    mpu_gyro_float_z=(float)mpu_gyro_z*0.0610361;
@@ -111,8 +112,8 @@ int main(void)
     mpu_acc_float_y=(float)mpu_acc_y*0.2392615;
     mpu_acc_float_z=(float)mpu_acc_z*0.2392615;
     
-    //利用加速度计计算倾角(角度值)
-    //利用函数将倾角转换为符合右手螺旋定则的转动系
+//利用加速度计计算倾角(角度值)
+//利用函数将倾角转换为符合右手螺旋定则的转动系
 //    angle_z_now=atan2(mpu_acc_y,mpu_acc_x)*(float)180/3.1415926;
 //    angle_x_now=atan2(mpu_acc_z,mpu_acc_y)*(float)180/3.1415926;
     angle_y_now=atan2(mpu_acc_x,mpu_acc_z)*(float)180/3.1415926;
@@ -163,10 +164,42 @@ int main(void)
      dis_bmp(OV7725_H,OV7725_W,image_dec[0],123);
    }
 }
-
-
 #endif
 
+//四元数解算调试程序
+#if debug_mode==3
+
+//extern _imu_st imu_data;
+//extern _sensor_st sensor;
+
+int main(void)
+{
+    get_clk();//上电后必须运行一次这个函数，获取各个频率信息，便于后面各个模块的参数设置
+   
+    DisableInterrupts;   //关闭所有中断
+       
+    NVIC_SetPriorityGrouping(6);
+
+    
+    EnableInterrupts;
+   
+   uart_init (uart0, 115200);
+   while(mpu6050_Init());
+   OLED_Init();
+    
+   ftm_pwm_init(ftm3,ftm_ch0,10*1000,0);
+   ftm_pwm_init(ftm3,ftm_ch1,10*1000,0);
+   ftm_pwm_init(ftm3,ftm_ch2,10*1000,0);
+   ftm_pwm_init(ftm3,ftm_ch3,10*1000,0);
+
+   while(1)
+   {
+     
+      IMU_update(0.008f,&(sensor.Gyro_deg), &(sensor.Acc_mmss),&imu_data); //
+
+   }
+}
+#endif
 
 //      //停止摄像头采集
 //      disable_irq(INTERRUPT_NUNBERS);
